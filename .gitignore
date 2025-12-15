@@ -26,7 +26,27 @@ staticfiles/
 .DS_Store
 Thumbs.db
 
-# Node 
-node_modules/
-dist/
-build/
+# Node (Frontend)
+**/node_modules/
+**/dist/
+**/build/
+**/.npm/
+**/.pnpm-store/
+
+# Vite
+*.local
+**/.vite/
+
+# TypeScript
+*.tsbuildinfo
+
+# Environment variables
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Package manager lock files 
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
