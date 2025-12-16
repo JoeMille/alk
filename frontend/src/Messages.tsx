@@ -93,7 +93,7 @@ function Messages() {
         <div className="space-y-4">
           <h2 className="text-xl font-semibold">Messages</h2>
           {messages.length === 0 ? (
-            <p className="text-gray-500">No messages yet. Be the first to post!</p>
+            <p className="text-gray-500">No messages yet.</p>
           ) : (
             messages.map((message) => (
               <div key={message.id} className="bg-white rounded-lg shadow p-4">
