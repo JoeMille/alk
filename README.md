@@ -53,11 +53,6 @@ Create a simple test component:
 - Form to create new message
 - POST to Django API
 
-Test flow:
-1. Type message in React form
-2. Submit creates message via API
-3. Message appears in list
-
 ### 6. Expand Models & Django Apps
 
 Create proper Django apps:
