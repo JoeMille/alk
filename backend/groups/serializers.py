@@ -125,3 +125,37 @@ class GroupCreateSerializer(serializers.ModelSerializer):
         Membership.objects.create(user=request.user, group=group, role="admin")
 
         return group
+
+class ThreadSerializer(serializers.ModelSerializer):
+    created_by = UserSerializer(read_only=True)
+    created_by_username = serializers.CharField(
+        source='created_by.username',
+        read_only=True
+    )
+    message_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Thread
+        fields = (
+            'id',
+            'group',
+            'subject',
+            'created_by',
+            'created_by_username',
+            'created_at',
+            'updated_at',
+            'message_count',
+        )
+        read_only_fields = ('id', 'created_at', 'updated_at', 'created_by')
+
+    def get_message_count(self, obj):
+        return obj.messages.count()
+    
+    def validate_group(self, value):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            if not value.members.filter(id=request.user.id).exists():
+                raise serializers.ValidationError(
+                    "You must be a member of this group to create threads"
+                )
+        return value
