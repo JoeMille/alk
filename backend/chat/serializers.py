@@ -4,6 +4,4 @@ from .models import Message
 class MessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
-        fields = ['id', 'text', 'author', 'created_at']
-        read_only_fields = ['id', 'created_at']
-        
+        fields = '__all__'
