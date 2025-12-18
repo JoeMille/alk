@@ -118,7 +118,6 @@ Test real-time messaging
 
 ### 12. Add Background Tasks with Celery
 
-Install celery and redis
 Configure celery.py
 Create tasks:
 - send_notification_email (on @mentions)
@@ -130,19 +129,4 @@ Test tasks execute in background
 
 ### 13. Dockerize Everything
 
-Create docker-compose.yml with services:
-- postgres
-- redis
-- backend (Django)
-- celery-worker
-- celery-beat  
-- frontend (React)
-
-Create Dockerfiles for backend and frontend
-
-### 14. Testing
-
-Write tests for:
-- Django models and API endpoints (pytest-django)
-- Frontend components (Vitest/React Testing Library)
-- Integration tests for key flows
+Create docker-compose.yml with services
