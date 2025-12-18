@@ -5,11 +5,12 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+
 class MembershipSerializer(serializers.ModelSerializer):
+
     user = UserSerializer(read_only=True)
-
     group_name = serializers.CharField(source='group.name', read_only=True)
-
+    
     class Meta:
         model = Membership
         fields = (
@@ -22,16 +23,16 @@ class MembershipSerializer(serializers.ModelSerializer):
         )
         read_only_fields = ('id', 'joined_at')
 
+
 class GroupListSerializer(serializers.ModelSerializer):
+
     created_by_username = serializers.CharField(
         source='created_by.username',
         read_only=True
     )
-
     member_count = serializers.SerializerMethodField()
-
     thread_count = serializers.SerializerMethodField()
-
+    
     class Meta:
         model = Group
         fields = (
@@ -45,29 +46,28 @@ class GroupListSerializer(serializers.ModelSerializer):
             'thread_count',
         )
         read_only_fields = ('id', 'created_at')
-
+    
     def get_member_count(self, obj):
         return obj.members.count()
-
+    
     def get_thread_count(self, obj):
         return obj.threads.count()
 
-class GroupDetailSerializer(serializers.ModelSerializer):
-    created_by = UserSerializer(read_only=True)
 
+class GroupDetailSerializer(serializers.ModelSerializer):
+
+    created_by = UserSerializer(read_only=True)
     memberships = MembershipSerializer(
         many=True,
         read_only=True,
-        source='memberhsip_set'
+        source='membership_set'
     )
-
-    member_count = serializers.SerializeMethodField()
-    thread_count = serializers.SerializeMethodField()
-
-    is_member = serializers.SerializeMethodField()
-    user_role = serializers.SerializeMethodField()
-
-    class Meta: 
+    member_count = serializers.SerializerMethodField()
+    thread_count = serializers.SerializerMethodField()
+    is_member = serializers.SerializerMethodField()
+    user_role = serializers.SerializerMethodField()
+    
+    class Meta:
         model = Group
         fields = (
             'id',
@@ -92,13 +92,13 @@ class GroupDetailSerializer(serializers.ModelSerializer):
     
     def get_is_member(self, obj):
         request = self.context.get('request')
-        if request and request.user.is_aythenticated:
+        if request and request.user.is_authenticated:
             return obj.members.filter(id=request.user.id).exists()
         return False
     
     def get_user_role(self, obj):
         request = self.context.get('request')
-        if request and request.user.is_athenticated:
+        if request and request.user.is_authenticated:
             try:
                 membership = Membership.objects.get(
                     user=request.user,
@@ -108,8 +108,10 @@ class GroupDetailSerializer(serializers.ModelSerializer):
             except Membership.DoesNotExist:
                 return None
         return None
-    
-class GroupeCReateSerializer(serializers.ModelSerializer):
+
+
+class GroupCreateSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Group
         fields = (
@@ -121,16 +123,16 @@ class GroupeCReateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
 
         request = self.context.get('request')
-
+        
         group = Group.objects.create(
             created_by=request.user,
             **validated_data
         )
-
+        
         Membership.objects.create(
             user=request.user,
             group=group,
             role='admin'
         )
-
-        return group 
+        
+        return group
