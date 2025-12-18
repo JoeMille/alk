@@ -34,7 +34,7 @@ class UserModelTest(TestCase):
     
     def test_user_str(self):
         user = User.objects.create_user(
-            username='testuser',  # Fixed: was 'usernmae'
+            username='testuser',  
             email='test@example.com',
             password='testpass123'
         )
