@@ -13,13 +13,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: set up python
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.12'
       
-      - name: Install dependancies
+      - name: Install dependencies
         run: |
-          cd backend 
+          cd backend
+          pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Run migrations
+        run: |
+          cd backend
+          python manage.py migrate
+      
+      - name: Run tests
+        run: |
+          cd backend
           python manage.py test
-          
