@@ -1,3 +1,4 @@
+from django.db import models 
 from rest_framework import viewsets, permissions, status 
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -9,6 +10,7 @@ from .serializers import (
     GroupDetailSerializer,
     GroupCreateSerializer,
     MembershipSerializer,
+    ThreadSerializer,
 )
 
 class GroupViewSet(viewsets.ModelViewSet):
@@ -17,15 +19,33 @@ class GroupViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action == 'list':
             return GroupListSerializer
-        elif self.action == 'create':
-            return GroupListSerializer
-        return GroupListSerializer
-    
+
+        if self.action == 'retrieve':
+            return GroupDetailSerializer
+
+        if self.action == 'create':
+            return GroupCreateSerializer
+
+        if self.action in ('join', 'leave'):
+            return MembershipSerializer
+
+        return GroupDetailSerializer 
+
     def get_queryset(self):
         user = self.request.user
-        return Group.objects.filter(
-            models.Q(is_private=False) | models.Q(members=user)
+        group_id = self.request.query_params.get('group')
+
+        queryset = Thread.objects.all()
+
+        if group_id:
+            queryset = queryset.filter(group_id=group_id)
+        
+        return queryset.filter(
+            group_members=user
         ).distinct()
+    
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
     
     @action(detail=True, methods=['post'])
     def join(self, request, pk=None):
