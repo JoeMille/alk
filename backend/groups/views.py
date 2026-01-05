@@ -2,7 +2,6 @@ from django.db import models
 from rest_framework import viewsets, permissions, status 
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from django.shortcuts import render, get_object_or_404
 
 from .models import Group, Membership, Thread
 from .serializers import (
@@ -19,29 +18,19 @@ class GroupViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action == 'list':
             return GroupListSerializer
-
         if self.action == 'retrieve':
             return GroupDetailSerializer
-
         if self.action == 'create':
             return GroupCreateSerializer
-
         if self.action in ('join', 'leave'):
             return MembershipSerializer
-
         return GroupDetailSerializer 
 
     def get_queryset(self):
+        # ========== FIXED: Return Groups, not Threads ==========
         user = self.request.user
-        group_id = self.request.query_params.get('group')
-
-        queryset = Thread.objects.all()
-
-        if group_id:
-            queryset = queryset.filter(group_id=group_id)
-        
-        return queryset.filter(
-            group_members=user
+        return Group.objects.filter(
+            models.Q(is_private=False) | models.Q(members=user)
         ).distinct()
     
     def perform_create(self, serializer):
@@ -76,7 +65,6 @@ class GroupViewSet(viewsets.ModelViewSet):
     
     @action(detail=True, methods=['post'])
     def leave(self, request, pk=None):
-
         group = self.get_object()
 
         try:
@@ -95,8 +83,7 @@ class GroupViewSet(viewsets.ModelViewSet):
                     )
                 
             membership.delete()
-            return Response(
-                status=status.HTTP_204_NO_CONTENT)
+            return Response(status=status.HTTP_204_NO_CONTENT)
         
         except Membership.DoesNotExist:
             return Response(
@@ -104,11 +91,13 @@ class GroupViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+
 class ThreadViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
+    serializer_class = ThreadSerializer  
 
     def get_queryset(self):
-        
+        user = self.request.user
         group_id = self.request.query_params.get('group')
         queryset = Thread.objects.all()
 
@@ -116,7 +105,7 @@ class ThreadViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(group_id=group_id)
         
         return queryset.filter(
-            group_members=self.request.user
+            group__members=user
         ).distinct()
     
     def perform_create(self, serializer):

@@ -29,7 +29,7 @@ export const authService = {
             password,
         });
 
-        localStorage.setItem('access_token', response.data.acess);
+        localStorage.setItem('access_token', response.data.access);
         localStorage.setItem('refresh_token', response.data.refresh);
 
         return response.data;
